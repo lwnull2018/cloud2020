@@ -1,0 +1,75 @@
+server:
+  port: 2001
+spring:
+  application:
+    name: seata-order-service
+#  cloud:
+#    nacos:
+#      # 注册中心
+#      discovery:
+#        server-addr: localhost:8888
+#        username: nacos
+#        password: nacos
+#        group: SEATA_GROUP
+#
+#      # 配置中心
+#      config:
+#        server-addr: localhost:8888
+#        context-path: /nacos
+#        username: nacos
+#        password: nacos
+#        group: SEATA_GROUP
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/seata_order
+    username: root
+    password: root
+  cloud:
+    # 使用nacos负载均衡
+    loadbalancer:
+      nacos:
+        enabled: true
+    nacos:
+      server-addr: localhost:8848
+
+seata:
+  enabled: true
+  #设置分组名称
+  tx-service-group: order_tx_group
+  service:
+    vgroup-mapping:
+      # 当前分组的集群名称,seata单机模式集群名称默认为default
+      order_tx_group: default
+  registry:
+    type: nacos
+    nacos:
+      # 配置seata服务在注册中心服务名,默认为seata-server
+      application: seata-server  # seata server 的服务名
+      group: SEATA_GROUP # seata server 所在的分组名称，默认为：SEATA_GROUP
+      username: nacos
+      password: nacos
+      server-addr: localhost:8848 # seata server 所在的 nacos 服务地址
+      context-path: /nacos
+      namespace: public
+
+feign:
+  hystrix:
+    enabled: false
+  client:
+    config:
+      # default:对所有服务生效     需要对单个服务配置将default改为服务名
+      default:
+        connect-timeout: 3000
+        read-timeout: 2000
+        # 调用日志打印等级，需要同步将Feign调用类的日志等级设置为Debug才生效
+        logger-level: basic
+
+# 注意，这是自定义的，原来的是mapper_locations
+mybatis:
+  mapperLocations: classpath:mapper/*.xml
+
+logging:
+  level:
+    io:
+      seata: info
